@@ -1,0 +1,522 @@
+#include <LiquidCrystal.h>
+
+#define BUTTON_OK 6
+#define BUTTON_CANCEL 7
+#define BUTTON_PREV 8
+#define BUTTON_NEXT 9
+
+
+
+enum Buttons {
+  EV_OK,
+  EV_CANCEL,
+  EV_NEXT,
+  EV_PREV,
+  EV_NONE,
+  EV_MAX_NUM
+};
+
+enum Menus {
+  MENU_MAIN = 0,
+  MENU_ALEGE_PROGRAM,
+  MENU_StART_PROGRAM,
+  MENU_TEMP,
+  MENU_KP,
+  MENU_KI,
+  MENU_KD,
+  MENU_TINC,
+  MENU_TMEN,
+  MENU_TRAC,
+  MENU_MAX_NUM
+};
+
+enum Program {
+  Incalzire,   //0
+  Mentinere,   //1
+  Racire,      //2
+  PROGRAM_MAX_NUM
+};
+typedef struct Sistem{
+  int temperatura;
+  uint16_t sec_incalzire;
+  uint16_t sec_mentinere;
+  uint16_t sec_racire;
+  double kp;
+  double ki;
+  double kd;
+} Sistem_parametrii;
+
+Sistem_parametrii sys_param = {.temperatura = 36, .sec_incalzire = 1, .sec_mentinere = 2, .sec_racire = 3, .kp = 23, .ki = 10, .kd = 15};
+
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+int aux_tempset;
+double aux_kp;
+double aux_ki;
+double aux_kd;
+uint16_t aux_sec_incalzire;
+uint16_t aux_sec_mentinere;
+uint16_t aux_sec_racire;
+float temp_q = 0;
+Program prog = Incalzire;
+Menus scroll_menu = MENU_MAIN;
+Menus current_menu =  MENU_MAIN;
+bool save = false;
+void state_machine(enum Menus menu, enum Buttons button);
+Buttons GetButtons(void);
+void print_menu(enum Menus menu);
+
+typedef void (state_machine_handler_t)(void);
+
+void print_menu(enum Menus menu)
+{
+  lcd.clear();
+  switch(menu)
+  {
+    case MENU_ALEGE_PROGRAM:
+    lcd.clear();
+    lcd.print("Meniu Principal");
+    lcd.setCursor(0,1); 
+    lcd.print("Alege Program");
+    if (current_menu == MENU_ALEGE_PROGRAM)
+    {
+      lcd.clear();
+      lcd.print("Selectie Program");
+      lcd.setCursor(0,1); 
+      lcd.print("Program ");
+      lcd.print(prog);
+    }
+    break;
+    
+    case MENU_StART_PROGRAM: 
+    lcd.clear();
+    lcd.print("Meniu Principal");
+    lcd.setCursor(0,1); 
+    lcd.print("Start Program");
+    if (current_menu == MENU_StART_PROGRAM)
+     {
+      switch(prog){
+        case Incalzire:
+         lcd.clear();
+         lcd.print("P");
+         lcd.print(prog);
+         lcd.print(" Tinc:");
+         lcd.print(sys_param.sec_incalzire);
+         lcd.setCursor(0,1);
+         lcd.print("Tcur:");
+         lcd.print(sys_param.temperatura);
+         lcd.print(" TSet:");
+         lcd.print(aux_tempset);
+        break;
+        case Mentinere:
+         lcd.clear();
+         lcd.print("P");
+         lcd.print(prog);
+         lcd.print(" Tmen:");
+         lcd.print(sys_param.sec_mentinere);
+         lcd.setCursor(0,1);
+         lcd.print("Tcur:");
+         lcd.print(sys_param.temperatura);
+         lcd.print(" TSet:");
+         lcd.print(aux_tempset);
+      break;
+      case Racire:
+       lcd.clear();
+         lcd.print("P");
+         lcd.print(prog);
+         lcd.print(" Trac:");
+         lcd.print(sys_param.sec_racire);
+         lcd.setCursor(0,1);
+         lcd.print("Tcur:");
+         lcd.print(sys_param.temperatura);
+         lcd.print(" TSet:");
+         lcd.print(aux_tempset);
+      break;
+     }
+     }
+    break;
+    
+     case MENU_TEMP:
+      lcd.clear();
+      lcd.print("Meniu Principal");
+      lcd.setCursor(0,1); 
+      lcd.print("Temp. Setata");
+     if((current_menu == MENU_TEMP))
+     {
+      lcd.clear();
+      lcd.print("Temp: ");
+      lcd.print(sys_param.temperatura);
+      lcd.setCursor(0,1);
+      lcd.print("modifica");
+       if (save == true)
+         {
+           lcd.print(" Salvat!");
+           delay(2000);
+         }
+     }
+      break;
+      
+    case MENU_KP:
+     lcd.clear();
+     lcd.print("Meniu Principal");
+     lcd.setCursor(0,1); 
+     lcd.print("Const. KP");
+     if((current_menu == MENU_KP))
+     {
+      lcd.clear();
+      lcd.print("PID - Prog:");
+      lcd.print(prog);
+      lcd.setCursor(0,1);
+      lcd.print("KP:");
+      lcd.print(sys_param.kp);
+       if (save == true)
+         {
+           lcd.print(" Salvat!");
+           delay(2000);
+         }
+     }
+      break;
+      
+    case MENU_KI:
+     lcd.clear();
+     lcd.print("Meniu Principal");
+     lcd.setCursor(0,1); 
+     lcd.print("Const. KI");
+     if((current_menu == MENU_KI))
+     {
+      lcd.clear();
+      lcd.print("PID - Prog:");
+      lcd.print(prog);
+      lcd.setCursor(0,1);
+      lcd.print("KI:");
+      lcd.print(sys_param.ki);
+       if (save == true)
+         {
+           lcd.print(" Salvat!");
+           delay(2000);
+         }
+     }
+      break;
+      
+    case MENU_KD:
+     lcd.clear();
+     lcd.print("Meniu Principal");
+     lcd.setCursor(0,1); 
+     lcd.print("Const. KD");
+     if((current_menu == MENU_KD))
+     {
+      lcd.clear();
+      lcd.print("PID - Prog:");
+      lcd.print(prog);
+      lcd.setCursor(0,1);
+      lcd.print("KD:");
+      lcd.print(sys_param.kd);
+       if (save == true)
+         {
+           lcd.print(" Salvat!");
+           delay(2000);
+         }
+     }
+      break;
+      
+    case MENU_TINC:
+     lcd.clear();
+     lcd.print("Meniu Principal");
+     lcd.setCursor(0,1); 
+     lcd.print("timp incalzire");
+     if((current_menu == MENU_TINC))
+     {
+      lcd.clear();
+      lcd.print("Incalzire-P:");
+      lcd.print(prog);
+      lcd.setCursor(0,1);
+      lcd.print("Timp:");
+      lcd.print(sys_param.sec_incalzire);
+      if (save == true)
+         {
+           lcd.print(" Salvat!");
+           delay(2000);
+         }
+     }
+      break;
+      
+     case MENU_TMEN:
+     lcd.clear();
+     lcd.print("Meniu Principal");
+     lcd.setCursor(0,1); 
+     lcd.print("timp mentinere");
+     if((current_menu == MENU_TMEN))
+     {
+      lcd.clear();
+      lcd.print("Mentinere-P:");
+      lcd.print(prog);
+      lcd.setCursor(0,1);
+      lcd.print("Timp:");
+      lcd.print(sys_param.sec_mentinere);
+      if (save == true)
+         {
+           lcd.print(" Salvat!");
+           delay(2000);
+         }
+     }
+      break;
+      
+     case MENU_TRAC:
+     lcd.clear();
+     lcd.print("Meniu Principal");
+     lcd.setCursor(0,1); 
+     lcd.print("timp racire");
+     if((current_menu == MENU_TRAC))
+     {
+      lcd.clear();
+      lcd.print("Racire-P:");
+      lcd.print(prog);
+      lcd.setCursor(0,1);
+      lcd.print("Timp:");
+      lcd.print(sys_param.sec_racire);
+      if (save == true)
+         {
+           lcd.print(" Salvat!");
+           delay(2000);
+         }
+     }
+     break;
+    case MENU_MAIN:
+    default:
+      //lcd.setCursor(0,0); 
+      lcd.clear();
+      lcd.print("Meniu Principal");
+      lcd.setCursor(0,1);
+      lcd.print("Prog_actual:"); 
+      lcd.print(prog);
+      break;
+  }
+   save = false;
+}
+
+void enter_menu(void)
+{
+  current_menu = scroll_menu;
+}
+
+void go_home(void)
+{
+  scroll_menu = MENU_MAIN;
+  current_menu = scroll_menu;
+}
+
+void go_next(void)
+{
+  scroll_menu = (Menus) ((int)scroll_menu + 1);
+  scroll_menu = (Menus) ((int)scroll_menu % MENU_MAX_NUM);
+}
+
+void go_prev(void)
+{
+  scroll_menu = (Menus) ((int)scroll_menu - 1);
+  scroll_menu = (Menus) ((int)scroll_menu % MENU_MAX_NUM);
+}
+
+void save_kp(void)
+{
+  aux_kp = sys_param.kp;
+  save = true;
+}
+
+void inc_kp(void)
+{
+  sys_param.kp += 0.01;
+}
+
+void dec_kp(void)
+{
+  sys_param.kp -= 0.01;
+}
+
+void save_temp(void)
+{
+  aux_tempset = sys_param.temperatura;
+  save = true;
+}
+
+void inc_temp(void)
+{
+  sys_param.temperatura++;
+}
+
+void dec_temp(void)
+{
+  sys_param.temperatura--;
+}
+
+void inc_program(void)
+{
+  prog = (Program) ((int)prog + 1);
+  prog = (Program) ((int)prog % PROGRAM_MAX_NUM);
+}
+
+void dec_program(void)
+{
+  prog = (Program) ((unsigned int)prog - 1);
+  prog = (Program) ((unsigned int)prog % PROGRAM_MAX_NUM);
+}
+
+void save_ki(void)
+{
+  aux_ki = sys_param.ki;
+  save = true;
+}
+
+void inc_ki(void)
+{
+  sys_param.ki += 0.01;
+}
+
+void dec_ki(void)
+{
+  sys_param.ki -= 0.01;
+}
+
+void save_kd(void)
+{
+  aux_kd = sys_param.kd;
+  save = true;
+}
+
+void inc_kd(void)
+{
+  sys_param.kd += 0.01;
+}
+
+void dec_kd(void)
+{
+  sys_param.kd -= 0.01;
+}
+
+void save_tinc(void)
+{
+  aux_sec_incalzire = sys_param.sec_incalzire;
+  save = true;
+}
+
+void inc_tinc(void)
+{
+  sys_param.sec_incalzire ++;
+}
+
+void dec_tinc(void)
+{
+  sys_param.sec_incalzire --;
+}
+
+void save_tmen(void)
+{
+  aux_sec_mentinere = sys_param.sec_mentinere;
+  save = true;
+}
+
+void inc_tmen(void)
+{
+  sys_param.sec_mentinere ++;
+}
+
+void dec_tmen(void)
+{
+  sys_param.sec_mentinere --;
+}
+
+void save_trac(void)
+{
+  aux_sec_racire = sys_param.sec_racire;
+  save = true;
+}
+
+void inc_trac(void)
+{
+  sys_param.sec_racire ++;
+}
+
+void dec_trac(void)
+{
+  sys_param.sec_racire --;
+}
+
+int evaluateButton(int x) {
+  int result = 0;
+  if (x < 50) {
+    result = 1; // right
+  } else if (x < 195) {
+    result = 2; // up
+  } else if (x < 380) {
+    result = 3; // down
+  } else if (x < 790) {
+    result = 4; // left
+  }
+  return result;
+}
+
+state_machine_handler_t* sm[MENU_MAX_NUM][EV_MAX_NUM] = 
+{ //events: OK , CANCEL , NEXT, PREV
+  {enter_menu, go_home, go_next, go_prev},            // MENU_MAIN
+  {go_home, go_home, inc_program, dec_program},       // MENU_ALEGE_PROGRAM
+  {go_home, go_home, go_home, go_home},               // MENU START_PROGRAM                 
+  {save_temp, go_home, inc_temp, dec_temp},           // MENU_TEMP
+  {save_kp, go_home, inc_kp, dec_kp},                 // MENU_KP
+  {save_ki, go_home, inc_ki, dec_ki},                 // MENU_KI
+  {save_kd, go_home, inc_kd, dec_kd},                 // MENU_KD
+  {save_tinc, go_home, inc_tinc, dec_tinc},           // MENU_TINC
+  {save_tmen, go_home, inc_tmen, dec_tmen},           // MENU_TMEN
+  {save_trac, go_home, inc_trac, dec_trac},           // MENU_TRAC
+};
+
+void state_machine(enum Menus menu, enum Buttons button)
+{
+  sm[menu][button]();
+}
+
+Buttons GetButtons(void)
+{
+  enum Buttons ret_val = EV_NONE;
+  int readKey = analogRead(0);
+  if (readKey < 790) {
+      delay(100);
+      readKey = analogRead(0);
+    }
+ int button = evaluateButton(readKey);
+  
+  if (button == 1)
+  {
+    ret_val = EV_OK;
+  }
+  else if (button == 4)
+  {
+    ret_val = EV_CANCEL;
+  }
+  else if (button == 3)
+  {
+    ret_val = EV_NEXT;
+  }
+  else if (button == 2)
+  {
+    ret_val = EV_PREV;
+  }
+  Serial.print(ret_val);
+  return ret_val;
+}
+
+void setup()
+{
+  Serial.begin(9600);
+  lcd.begin(16,2);
+  lcd.clear();
+}
+
+void loop()
+{
+  volatile Buttons event = GetButtons();
+  if (event != EV_NONE)
+  {
+    state_machine(current_menu, event);
+  }
+    print_menu(scroll_menu);
+    delay(500);
+}
