@@ -5,8 +5,6 @@
 #define BUTTON_PREV 8
 #define BUTTON_NEXT 9
 
-
-
 enum Buttons {
   EV_OK,
   EV_CANCEL,
@@ -57,6 +55,7 @@ uint16_t aux_sec_incalzire;
 uint16_t aux_sec_mentinere;
 uint16_t aux_sec_racire;
 float temp_q = 0;
+volatile Buttons event;
 Program prog = Incalzire;
 Menus scroll_menu = MENU_MAIN;
 Menus current_menu =  MENU_MAIN;
@@ -150,7 +149,7 @@ void print_menu(enum Menus menu)
        if (save == true)
          {
            lcd.print(" Salvat!");
-           delay(2000);
+           delay(200000);
          }
      }
       break;
@@ -171,7 +170,7 @@ void print_menu(enum Menus menu)
        if (save == true)
          {
            lcd.print(" Salvat!");
-           delay(2000);
+           delay(200000);
          }
      }
       break;
@@ -192,7 +191,7 @@ void print_menu(enum Menus menu)
        if (save == true)
          {
            lcd.print(" Salvat!");
-           delay(2000);
+           delay(200000);
          }
      }
       break;
@@ -213,7 +212,7 @@ void print_menu(enum Menus menu)
        if (save == true)
          {
            lcd.print(" Salvat!");
-           delay(2000);
+           delay(200000);
          }
      }
       break;
@@ -234,7 +233,7 @@ void print_menu(enum Menus menu)
       if (save == true)
          {
            lcd.print(" Salvat!");
-           delay(2000);
+           delay(200000);
          }
      }
       break;
@@ -255,7 +254,7 @@ void print_menu(enum Menus menu)
       if (save == true)
          {
            lcd.print(" Salvat!");
-           delay(2000);
+           delay(200000);
          }
      }
       break;
@@ -276,7 +275,7 @@ void print_menu(enum Menus menu)
       if (save == true)
          {
            lcd.print(" Salvat!");
-           delay(2000);
+           delay(200000);
          }
      }
      break;
@@ -482,24 +481,29 @@ Buttons GetButtons(void)
       readKey = analogRead(0);
     }
  int button = evaluateButton(readKey);
-  
+ 
   if (button == 1)
   {
     ret_val = EV_OK;
+  
   }
   else if (button == 4)
   {
     ret_val = EV_CANCEL;
+   
   }
   else if (button == 3)
   {
     ret_val = EV_NEXT;
+  
   }
   else if (button == 2)
   {
     ret_val = EV_PREV;
+    
   }
   Serial.print(ret_val);
+  
   return ret_val;
 }
 
@@ -508,15 +512,23 @@ void setup()
   Serial.begin(9600);
   lcd.begin(16,2);
   lcd.clear();
+  OCR1A= 65535;
+  TCCR1B |= (1<<WGM12) | (1<<CS11) | (1<<CS10);
+  TIMSK1 |= (1<<OCIE1A);
+  sei();
 }
 
 void loop()
 {
-  volatile Buttons event = GetButtons();
+  
+}
+
+ISR(TIMER1_COMPA_vect) {
+  event = GetButtons();
   if (event != EV_NONE)
   {
     state_machine(current_menu, event);
   }
-    print_menu(scroll_menu);
-    delay(500);
+  print_menu(scroll_menu);
+    delay(100000);
 }
