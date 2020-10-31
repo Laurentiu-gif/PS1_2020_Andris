@@ -1,29 +1,13 @@
  #include <LiquidCrystal.h>
 
-// initialize the library with the numbers of the interface pins
-//    LiquidCrystal lcd(RS, enable, d4, d5, d6, d7); //
-//
-// The parameters to this initialisation function are the pins on 
-// the Arduino board that are connected to the pins on the LCD Module, 
-// i.e., the pins on the right column in the table above.
-//
-// The first parameter is the “RS” — which, literally, means 
-//      “Register Select”, and which is used to tell the
-//       module if “that which comes over the bus (the set of data pins)
-//       corresponds to “data to print” or “control instructions”
-//
-// The second parameter is “Enable Signal"
-//       the remaining parameters are the 4 digital pins forming the bus.
-//
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
-
 
 int ora0=0,ora1=14,min0=5,min1=9,sec0=5,sec1=0;
 
 void adc_init()
 {
   ADCSRA |= ((1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0));
-  ADMUX |= (1<<REFS0);
+  ADMUX  |= (1<<REFS0);
   ADCSRA |= (1<<ADEN);
   ADCSRA |= (1<<ADSC);
 }
@@ -38,31 +22,43 @@ uint16_t read_adc(uint8_t channel)
   return ADC;
 }
 
+double read_temp() //read and return temperature
+{                                                                                                               
+ double voltage=0;                      
+ double Temperature=0;                     
+ double temperatureCelsius=0; int reading;
+ reading=read_adc(1);
+ voltage=reading*5.0; voltage/=1024.0; 
+ temperatureCelsius=(voltage-0.5)*100;
+ return temperatureCelsius;
+}
+
 int main()
 {
+   
   adc_init();
- 
   OCR1A= 15625;
   lcd.begin(16,2);
-  
-  TCCR1B|=1<<CS12|1<<CS10|1<<WGM12;
-  TIMSK1|=1<<OCIE1A;
+  TCCR1B |= (1<<CS12) | (1<<CS10) | (1<<WGM12);
+  TIMSK1 |= (1<<OCIE1A);
   sei();
+  
   while(1)
   {
-    
+     
   }
+  
 }
 
 ISR(TIMER1_COMPA_vect)
-{
+{ 
   sec1++;
   lcd.setCursor(0, 0);
   lcd.write("Temp = ");
   lcd.setCursor(7, 0);
   lcd.print("         ");
   lcd.setCursor(7, 0);
-  lcd.print((read_adc(1)* 0.004882814-0.5)*100,0);
+  lcd.print(read_temp());  
   lcd.write("'");
   lcd.write("C");
   if(sec1>9)
