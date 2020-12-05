@@ -133,7 +133,13 @@ void print_menu(enum Menus menu)
     default:
       lcd.setCursor(5, 0);
       lcd.print("PS 2020");
-
+      lcd.setCursor(0, 1);
+      lcd.print("Ora:");
+      lcd.print(h);
+      lcd.print(":");
+      lcd.print(m);
+      lcd.print(":");
+      lcd.print(s);
       break;
   }
 
