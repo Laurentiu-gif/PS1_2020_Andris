@@ -466,6 +466,8 @@ void setup() {
   EEPROM.get(0, parameter);
   timer1();
   Serial.begin(9600);
+  while (!Serial);
+  Serial.println("Tensiune_Bec, Temperatura");
 }
 
 ISR(TIMER1_COMPA_vect)
