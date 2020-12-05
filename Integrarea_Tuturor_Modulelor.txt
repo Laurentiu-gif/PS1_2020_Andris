@@ -470,25 +470,6 @@ void setup() {
   Serial.println("Tensiune_Bec, Temperatura");
 }
 
-ISR(TIMER1_COMPA_vect)
-{
-  PORTB ^= _BV(PB5);
-  if (digitalRead(13) == 0)
-    two_second = true;
-  s++;
-  if (s == 60)
-  {
-    m++;
-    s = 0;
-    if (m == 60)
-    {
-      h++;
-      m = 0;
-    }
-  }
-  one_second = true;
-}
-
 void loop() {
   if (one_second)
   {
@@ -511,6 +492,25 @@ void loop() {
     one_second = false;
    }
  }
+
+ISR(TIMER1_COMPA_vect)
+{
+  PORTB ^= _BV(PB5);
+  if (digitalRead(13) == 0)
+    two_second = true;
+  s++;
+  if (s == 60)
+  {
+    m++;
+    s = 0;
+    if (m == 60)
+    {
+      h++;
+      m = 0;
+    }
+  }
+  one_second = true;
+}
 
 void PID(void)
 {
