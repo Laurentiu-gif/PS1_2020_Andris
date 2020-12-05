@@ -465,6 +465,7 @@ void setup() {
   //EEPROM.put(0,parameter);
   EEPROM.get(0, parameter);
   timer1();
+  Serial.begin(9600);
 }
 
 ISR(TIMER1_COMPA_vect)
@@ -519,6 +520,9 @@ void PID(void)
   float output = kp * error + ki * suma_error + kd * diff;
   output = constrain(output, 0, 255);
   prev_error = error;
+  Serial.print(0.05 * output); //tensiune pe bec
+  Serial.print(" ");
+  Serial.println(temperatura);
 
   analogWrite(BEC_pin, int(output));
 }
