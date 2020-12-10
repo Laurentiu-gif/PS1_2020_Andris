@@ -78,61 +78,70 @@ void print_menu(enum Menus menu)
   {
     case MENU_KP:
       lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
       lcd.print("KP = ");
-      lcd.setCursor(5, 0);
+      lcd.setCursor(5, 1);
       lcd.print(parameter.kp);
       break;
     case MENU_KI:
       lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
       lcd.print("KI = ");
-      lcd.setCursor(5, 0);
+      lcd.setCursor(5, 1);
       lcd.print(parameter.ki);
       break;
     case MENU_KD:
       lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
       lcd.print("KD = ");
-      lcd.setCursor(5, 0);
+      lcd.setCursor(5, 1);
       lcd.print(parameter.kd);
       break;
     case MENU_TEMP:
       lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
       lcd.print("Temp = ");
-      if (parameter.temp < 50)
-      { 
-        lcd.print(parameter.temp);
-      }
-      else
-      { lcd.setCursor(7, 1);
-        lcd.print("MAX!");
-      }
+      lcd.print(parameter.temp);
       break;
     case MENU_TINCAL:
       lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
       lcd.print("TINCAL = ");
-      lcd.setCursor(9, 0);
+      lcd.setCursor(9, 1);
       lcd.print(parameter.tIncal);
       break;
     case MENU_TMEN:
       lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
       lcd.print("TMEN = ");
-      lcd.setCursor(7, 0);
+      lcd.setCursor(7, 1);
       lcd.print(parameter.tMen);
       break;
     case MENU_TRAC:
       lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
       lcd.print("TRAC = ");
-      lcd.setCursor(7, 0);
+      lcd.setCursor(7, 1);
       lcd.print(parameter.tRac);
       break;
     case MENU_START:
       lcd.setCursor(0, 0);
-      lcd.print("START!");
+      lcd.print("MENIU PRINCIPAL");
+      lcd.setCursor(0, 1);
+      lcd.print("START PROGRAM!");
       break;
 
     case MENU_MAIN:
     default:
-      lcd.setCursor(5, 0);
-      lcd.print("PS 2020");
+      lcd.setCursor(0, 0);
+      lcd.print("MENIU PRINCIPAL");
       lcd.setCursor(0, 1);
       lcd.print("Ora:");
       lcd.print(h);
@@ -145,12 +154,80 @@ void print_menu(enum Menus menu)
 
   if (current_menu == MENU_START)
   {
+    lcd.clear();
     afisare_timp();
   }
   else if (current_menu != MENU_MAIN)
   {
-    lcd.setCursor(0, 1);
-    lcd.print("Modifica");
+    switch(current_menu)
+    {
+      case MENU_KP:
+      lcd.clear(); 
+      lcd.setCursor(0, 0);
+      lcd.print("Modifica");  
+      lcd.setCursor(0, 1);
+      lcd.print("KP = ");
+      lcd.setCursor(5, 1);
+      lcd.print(parameter.kp);
+      break;
+      case MENU_KI:
+      lcd.clear(); 
+      lcd.setCursor(0, 0);
+      lcd.print("Modifica");  
+      lcd.setCursor(0, 1);
+      lcd.print("KI = ");
+      lcd.setCursor(5, 1);
+      lcd.print(parameter.ki);
+      break;
+      case MENU_KD:
+      lcd.clear(); 
+      lcd.setCursor(0, 0);
+      lcd.print("Modifica");  
+      lcd.setCursor(0, 1);
+      lcd.print("KD = ");
+      lcd.setCursor(5, 1);
+      lcd.print(parameter.kd);
+      break;
+      case MENU_TEMP:
+      lcd.clear(); 
+      lcd.setCursor(0, 0);
+      lcd.print("Modifica");  
+      lcd.setCursor(0, 1);
+      lcd.print("Temp = ");
+      if (parameter.temp < 50)
+      { 
+        lcd.print(parameter.temp);
+      }
+      else
+      { lcd.setCursor(7, 1);
+        lcd.print("MAX!");
+      }
+      break;
+      case MENU_TINCAL:
+      lcd.clear(); 
+      lcd.setCursor(0, 0);
+      lcd.print("Modifica");  
+      lcd.setCursor(0, 1);
+      lcd.print("TINCAL = ");
+      lcd.print(parameter.tIncal);
+      break;
+      case MENU_TMEN:
+       lcd.clear(); 
+      lcd.setCursor(0, 0);
+      lcd.print("Modifica");  
+      lcd.setCursor(0, 1);
+      lcd.print("TMEN = ");
+      lcd.print(parameter.tMen);
+      break;
+      case MENU_TRAC:
+       lcd.clear(); 
+      lcd.setCursor(0, 0);
+      lcd.print("Modifica");  
+      lcd.setCursor(0, 1);
+      lcd.print("TRAC = ");
+      lcd.print(parameter.tRac);
+      break;
+    }
   }
 }
 
