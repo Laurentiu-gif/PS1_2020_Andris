@@ -1,1 +1,1 @@
-# PS1_2021_AndrisHam control temperatura
+# PS1_2021_Andris control temperatura
